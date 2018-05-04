@@ -318,6 +318,39 @@ describeMathCPUAndGPU('Transpose', () => {
   });
 });
 
+describeMathCPUAndGPU('resizeImages', () => {
+  it('channelsLast upsample of 2x2 for Tensor4D', () => {
+    const x = tensor4d([[
+      [[1], [2], [3]],
+      [[4], [5], [6]],
+      [[7], [8], [9]]]]);
+
+    const expectedTensor = tensor4d([[
+      [[1.], [1.], [2.], [2.], [3.], [3.]],
+      [[1.], [1.], [2.], [2.], [3.], [3.]],
+      [[4.], [4.], [5.], [5.], [6.], [6.]],
+      [[4.], [4.], [5.], [5.], [6.], [6.]],
+      [[7.], [7.], [8.], [8.], [9.], [9.]],
+      [[7.], [7.], [8.], [8.], [9.], [9.]] ]]);
+
+    expectTensorsClose(
+        K.resizeImages(x, 2, 2, 'channelsLast'),
+        expectedTensor);
+  });
+
+  it('channelsLast upsample of 1x1 for Tensor4D', () => {
+    const x = tensor4d([[
+      [[1], [2], [3]],
+      [[4], [5], [6]],
+      [[7], [8], [9]]]]);
+
+
+    expectTensorsClose(
+        K.resizeImages(x, 1, 1, 'channelsLast'),
+        x);
+  });
+});
+
 describeMathCPUAndGPU('Reverse', () => {
   it('1D, along first axis', () => {
     const x = tensor1d([1, 3, -3, 7]);

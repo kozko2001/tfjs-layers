@@ -214,6 +214,35 @@ export function transpose(x: Tensor, perm?: number[]): Tensor {
 export const permuteDimensions = transpose;
 
 /**
+ * TODO! SOME DOCUMENTATION HERE!
+ *
+ * TODO: make it work with channelsFirst
+ * TODO: make it work with Tensor3D? ?? ?? ? ? ?
+ */
+export function resizeImages(
+    x: Tensor4D, heightFactor: number, widthFactor: number,
+    dataFormat: DataFormat): Tensor {
+  if (dataFormat === 'channelsFirst') {
+    // don't do yet...
+    console.log('Hey! I am lazy to do that!');
+
+    return x;
+  }
+  if (dataFormat === 'channelsLast') {
+    const originalShape = shape(x);
+    const newHeight = originalShape[1] * heightFactor;
+    const newWidth = originalShape[2] * widthFactor;
+
+    const newShape = [newHeight, newWidth] as [number, number];
+    x = tfc.image.resizeNearestNeighbor(x, newShape);
+    x = x.reshape([-1, newHeight, newWidth, originalShape[3]]);
+    return x;
+  }
+
+  return x;
+}
+
+/**
  * Reverse a tensor along the specified axis or axes.
  * @param x Tensor to reverse.
  * @param axes Integer or an `Array` of integers. Axis or axes to reverse.

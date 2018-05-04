@@ -915,3 +915,64 @@ export class Cropping2D extends Layer {
   }
 }
 generic_utils.ClassNameMap.register(Cropping2D);
+
+export interface UpSampling2DConfig extends LayerConfig {
+  /**
+   * The upsampling factors for rows and columns.
+   */
+  size: [number, number];
+
+  /**
+   * Format of the data, which determines the ordering of the dimensions in
+   * the inputs.
+   *
+   * `channels_last` corresponds to inputs with shape
+   *   `(batch, ..., channels)`
+   *
+   *  `channels_first` corresponds to inputs with shape `(batch, channels,
+   * ...)`.
+   *
+   * Defaults to `channels_last`.
+   */
+  dataFormat?: DataFormat;
+}
+
+export class UpSampling2D extends Layer {
+  static className = 'UpSampling2D';
+  protected readonly size: [number, number];
+  protected readonly dataFormat: DataFormat;
+
+  constructor(config: UpSampling2DConfig) {
+    super(config);
+    this.size = config.size;
+    this.dataFormat =
+        config.dataFormat === undefined ? 'channelsLast' : config.dataFormat;
+    this.inputSpec = [{ndim: 4}];
+  }
+
+  computeOutputShape(inputShape: Shape): Shape {
+    const height = this.size[0] * inputShape[2];
+    const width = this.size[1] * inputShape[3];
+
+    if (this.dataFormat === 'channelsFirst')
+      return [inputShape[0], inputShape[1], height, width];
+    else
+      return [inputShape[0], height, width, inputShape[3]];
+  }
+
+  // tslint:disable-next-line:no-any
+  call(inputs: Tensor|Tensor[], kwargs: any): Tensor|Tensor[] {
+    inputs = generic_utils.getExactlyOneTensor(inputs);
+
+    return K.resizeImages(
+        inputs as Tensor4D, this.size[0], this.size[1], this.dataFormat);
+  }
+
+  getConfig(): ConfigDict {
+    const config = {size: this.size, dataFormat: this.dataFormat};
+    const baseConfig = super.getConfig();
+    Object.assign(config, baseConfig);
+    return config;
+  }
+}
+generic_utils.ClassNameMap.register(UpSampling2D);

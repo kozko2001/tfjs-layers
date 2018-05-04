@@ -692,3 +692,23 @@ describe('Cropping2D Layer', () => {
     expectTensorsClose(layer.apply(x, null) as Tensor, y);
   });
 });
+
+describeMathCPUAndGPU('UpSampling2D layer', () => {
+  it('check upsampling with channels last and size 2x2', () => {
+    const x = tensor4d([[[[1], [2], [3]], [[4], [5], [6]], [[7], [8], [9]]]]);
+
+    const y = tensor4d([[
+      [[1.], [1.], [2.], [2.], [3.], [3.]],
+      [[1.], [1.], [2.], [2.], [3.], [3.]],
+      [[4.], [4.], [5.], [5.], [6.], [6.]],
+      [[4.], [4.], [5.], [5.], [6.], [6.]],
+      [[7.], [7.], [8.], [8.], [9.], [9.]],
+      [[7.], [7.], [8.], [8.], [9.], [9.]]
+    ]]);
+
+    const layer =
+        tfl.layers.upSampling2D({size: [2, 2], dataFormat: 'channelsLast'});
+
+    expectTensorsClose(layer.apply(x, null) as Tensor, y);
+  });
+});
